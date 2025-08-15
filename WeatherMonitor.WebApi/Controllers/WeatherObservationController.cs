@@ -1,10 +1,16 @@
-﻿namespace WeatherMonitor.WebApi.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+using WeatherMonitor.Application.Interfaces;
+
+namespace WeatherMonitor.WebApi.Controllers
 {
-    public class WeatherObservationController
+    [ApiController]
+    [Route("api/[controller]")]
+    public class WeatherObservationController: ControllerBase
     {
-        public WeatherObservationController()
+        private readonly IWeatherObservationService _weatherObservationService;
+        public WeatherObservationController(IWeatherObservationService weatherObservationService)
         {
-            
+            _weatherObservationService = weatherObservationService;
         }
     }
 }

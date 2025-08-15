@@ -7,7 +7,6 @@ using WeatherMonitor.Core.Interfaces;
 using WeatherMonitor.Infrastructure.Repositories;
 using WeatherMonitor.Infrastructure.Services;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
