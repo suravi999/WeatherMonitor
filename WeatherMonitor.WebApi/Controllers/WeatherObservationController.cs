@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WeatherMonitor.Application.Interfaces;
+using WeatherMonitor.Core.Entities;
 
 namespace WeatherMonitor.WebApi.Controllers
 {
@@ -11,6 +12,52 @@ namespace WeatherMonitor.WebApi.Controllers
         public WeatherObservationController(IWeatherObservationService weatherObservationService)
         {
             _weatherObservationService = weatherObservationService;
+        }
+
+        [HttpGet("{wmoId}")]
+        public async Task<ActionResult> GetWeatherData(string wmoId)
+        {
+            try
+            {
+                var data = await _weatherObservationService.GetAllWeatherDataAsync(wmoId);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("{wmoId}/summary")]
+        public async Task<ActionResult> GetWeatherSummary(string wmoId)
+        {
+            try
+            {
+                var summary = await _weatherObservationService.GetWeatherSummaryAsync(wmoId);
+                return Ok(summary);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("stations")]
+        public async Task<ActionResult<IEnumerable<WeatherObservationStation>>> GetStations()
+        {
+            try
+            {
+                var stations = await _weatherObservationService.GetAvailableStationsAsync();
+                return Ok(stations);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }
