@@ -12,7 +12,7 @@ namespace WeatherMonitor.Core.Entities
         public string StationName { get; set; } = string.Empty;
         public DateTime ObservationTime { get; set; }
         public double? Temperature { get; set; }
-        public double? ApprentTemperature { get; set; }
+        public double? ApparentTemperature { get; set; }
         public double? Humidity { get; set; }
         public double? WindSpeed { get; set; }
         public double? Pressure { get; set; }
