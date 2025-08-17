@@ -15,5 +15,6 @@ namespace WeatherMonitor.Application.Interfaces
         Task<(double AverageTemperature, int RecordCount)> CalculateAverageTemperatureAsync(string wmoId, int hours = 72);
         Task<WeatherObservationStation?> FindStationAsync(string searchTerm);
         Task<List<WeatherObservationStation>> GetAvailableStationsAsync();
+        Task<WeatherObservationDataResponse> GetWeatherDataAsync(string wmoId, WeatherObservationDataRequest request);
     }
 }

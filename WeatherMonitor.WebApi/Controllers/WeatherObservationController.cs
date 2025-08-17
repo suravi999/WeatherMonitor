@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WeatherMonitor.Application.DTOs;
 using WeatherMonitor.Application.Interfaces;
 using WeatherMonitor.Core.Entities;
 
@@ -6,7 +7,7 @@ namespace WeatherMonitor.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WeatherObservationController: ControllerBase
+    public class WeatherObservationController : ControllerBase
     {
         private readonly IWeatherObservationService _weatherObservationService;
         public WeatherObservationController(IWeatherObservationService weatherObservationService)
@@ -20,6 +21,28 @@ namespace WeatherMonitor.WebApi.Controllers
             try
             {
                 var data = await _weatherObservationService.GetAllWeatherDataAsync(wmoId);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // POST method to get weather data with optional request body
+        [HttpPost("{wmoId}/summary")]
+        public async Task<ActionResult<WeatherObservationDataResponse>> GetWeatherData(string wmoId, [FromBody] WeatherObservationDataRequest? request = null)
+        {
+            try
+            {
+                //If no body provided, use default request
+                request ??= new WeatherObservationDataRequest();
+
+                var data = await _weatherObservationService.GetWeatherDataAsync(wmoId, request);
                 return Ok(data);
             }
             catch (ArgumentException ex)

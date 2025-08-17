@@ -74,6 +74,10 @@ namespace WeatherMonitor.Application.Services
 
         public async Task<(double AverageTemperature, int RecordCount)> CalculateAverageTemperatureAsync(string wmoId, int hours = 72)
         {
+            if (hours <= 0)
+            {
+                hours = 72; //Default to 72 hours if invalid input
+            }
             var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
             var cutoffTime = DateTime.UtcNow.AddHours(-hours); //Calculate the cutoff time form current utc time, since we are dealing with UTC time of the response
 
@@ -92,6 +96,71 @@ namespace WeatherMonitor.Application.Services
         public async Task<List<WeatherObservationStation>> GetAvailableStationsAsync()
         {
             return await _weatherStationRepository.GetAllStationsAsync();
+        }
+
+        public async Task<WeatherObservationDataResponse> GetWeatherDataAsync(string wmoId, WeatherObservationDataRequest request)
+        {
+            var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
+            var latest = observations.FirstOrDefault();//assuming the first one is the latest
+            var station = await _weatherStationRepository.GetStationByWmoIdAsync(wmoId);
+
+            var (averageTemp, recCount) = await CalculateAverageTemperatureAsync(wmoId, request.TimeRangeHours);
+
+            var response = new WeatherObservationDataResponse
+            {
+                StationName = station?.Name ?? "Unknown Station",
+                WmoId = wmoId,
+                AverageTemperature = averageTemp,
+                ObservationCount = recCount
+            };
+
+            //Add requested additional fields
+            if (request.AdditionalFields.Any())
+            {
+                var (additionalData, unavailableFields) = ExtractAdditionalFields(latest, request.AdditionalFields);
+                response.AdditionalRequestedFields = additionalData;
+                response.UnavailableRequestedFields = unavailableFields;
+            }
+
+            return response;
+        }
+
+        private (Dictionary<string, object?> data, List<string> unavailable) ExtractAdditionalFields( WeatherObservation observation, List<string> requestedFields)
+        {
+            var data = new Dictionary<string, object?>();
+            var unavailable = new List<string>();
+
+            foreach (var field in requestedFields)
+            {
+                var value = GetFieldValue(observation, field.ToLower());
+                if (value != null)
+                {
+                    data[field] = value;
+                }
+                else
+                {
+                    unavailable.Add(field);
+                }
+            }
+
+            return (data, unavailable);
+        }
+
+        private object? GetFieldValue(WeatherObservation observation, string fieldName)
+        {
+            return fieldName switch
+            {
+                "temperature" or "temp" => observation.Temperature,
+                "apparenttemperature" or "apptemp" or "apparent" => observation.ApparentTemperature,
+                "dewpoint" or "dew" => observation.DewPoint,
+                "humidity" or "humid" => observation.Humidity,
+                "winddirection" or "winddir" => observation.WindDirection,
+                "windspeed" or "wind" => observation.WindSpeed,
+                "pressure" or "press" => observation.Pressure,
+                "condition" or "weather" => observation.WeatherCondition,
+                "observationtime" or "time" => observation.ObservationTime,
+                _ => null
+            };
         }
     }
 }
