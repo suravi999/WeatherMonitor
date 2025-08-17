@@ -10,7 +10,6 @@ namespace WeatherMonitor.Core.Interfaces
     public interface IWeatherObservationDataRepository
     {
         Task<List<WeatherObservation>> GetWeatherObservationsAsync(string wmoId);
-        Task<WeatherObservation?> GetLatestObservationAsync(string wmoId);
 
     }
 }

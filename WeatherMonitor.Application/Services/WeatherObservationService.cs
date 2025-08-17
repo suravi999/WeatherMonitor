@@ -46,9 +46,14 @@ namespace WeatherMonitor.Application.Services
             }).ToList();
         }
 
-        public Task<WeatherObservationStation?> FindStationAsync(string searchTerm)
+        public async Task<WeatherObservationStation?> FindStationAsync(string searchTerm)
         {
-            throw new NotImplementedException();
+            //Try search using WMO ID first
+            var station = await _weatherStationRepository.GetStationByWmoIdAsync(searchTerm);
+            if (station != null) return station;
+
+            //then try using station name
+            return await _weatherStationRepository.GetStationByNameAsync(searchTerm);
         }
 
         public async Task<WeatherObservationSummaryDto> GetWeatherSummaryAsync(string wmoId)
@@ -84,9 +89,9 @@ namespace WeatherMonitor.Application.Services
 
         }
 
-        public Task<List<WeatherObservationStation>> GetAvailableStationsAsync()
+        public async Task<List<WeatherObservationStation>> GetAvailableStationsAsync()
         {
-            throw new NotImplementedException();
+            return await _weatherStationRepository.GetAllStationsAsync();
         }
     }
 }

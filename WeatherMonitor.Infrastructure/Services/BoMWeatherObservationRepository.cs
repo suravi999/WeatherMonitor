@@ -30,11 +30,6 @@ namespace WeatherMonitor.Infrastructure.Services
             };
         }
 
-        public Task<WeatherObservation?> GetLatestObservationAsync(string wmoId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<List<WeatherObservation>> GetWeatherObservationsAsync(string wmoId)
         {
             try

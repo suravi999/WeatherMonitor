@@ -19,7 +19,7 @@ namespace WeatherMonitor.Infrastructure.Repositories
 
         public async Task<WeatherObservationStation?> GetStationByNameAsync(string name)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask;//For async consistency
             return _stations.FirstOrDefault(s =>
                 s.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
         }
@@ -35,6 +35,12 @@ namespace WeatherMonitor.Infrastructure.Repositories
         {
             await Task.CompletedTask;
             return _stations.Any(s => s.WmoId == wmoId);
+        }
+
+        public async Task<List<WeatherObservationStation>> GetAllStationsAsync()
+        {
+            await Task.CompletedTask; 
+            return _stations.ToList();
         }
 
         private List<WeatherObservationStation> LoadObservationStations()

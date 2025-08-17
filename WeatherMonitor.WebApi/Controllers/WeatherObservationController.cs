@@ -65,8 +65,25 @@ namespace WeatherMonitor.WebApi.Controllers
         {
             try
             {
-                var average = await _weatherObservationService.CalculateAverageTemperatureAsync(wmoId, hours);
-                return Ok(new { wmoId, hours, averageTemperature = average });
+                var (averageTemp, resCount) = await _weatherObservationService.CalculateAverageTemperatureAsync(wmoId, hours);
+                return Ok(new { wmoId, hours, averageTemperature = averageTemp, resultCount = resCount });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("stations/search/{searchTerm}")]
+        public async Task<ActionResult<WeatherObservationStation>> FindStation(string searchTerm)
+        {
+            try
+            {
+                var station = await _weatherObservationService.FindStationAsync(searchTerm);
+                if (station == null)
+                    return NotFound(new { error = $"No station found for search term: {searchTerm}" });
+
+                return Ok(station);
             }
             catch (Exception ex)
             {

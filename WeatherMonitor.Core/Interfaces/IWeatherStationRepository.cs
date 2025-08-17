@@ -12,5 +12,6 @@ namespace WeatherMonitor.Core.Interfaces
         Task<WeatherObservationStation?> GetStationByWmoIdAsync(string wmoId);
         Task<WeatherObservationStation?> GetStationByNameAsync(string country);
         Task<bool> IsValidWmoAsync(string wmoId);
+        Task<List<WeatherObservationStation>> GetAllStationsAsync();
     }
 }
