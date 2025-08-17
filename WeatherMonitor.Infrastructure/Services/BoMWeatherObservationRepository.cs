@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -75,8 +76,12 @@ namespace WeatherMonitor.Infrastructure.Services
             if (string.IsNullOrEmpty(dateTimeString))
                 return DateTime.MinValue;
 
-            if (DateTime.TryParse(dateTimeString, out var result))
+            if (dateTimeString.Length == 14 &&
+                DateTime.TryParseExact(dateTimeString, "yyyyMMddHHmmss",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
+            {
                 return result;
+            }
 
             return DateTime.MinValue;
         }

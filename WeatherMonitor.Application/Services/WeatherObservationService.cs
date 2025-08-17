@@ -56,30 +56,31 @@ namespace WeatherMonitor.Application.Services
             var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
             var station = await _weatherStationRepository.GetStationByWmoIdAsync(wmoId);
 
-            var averageTemp = await CalculateAverageTemperatureAsync(wmoId);
+            var (averageTemp, recCount) = await CalculateAverageTemperatureAsync(wmoId);
 
             return new WeatherObservationSummaryDto
             {
                 StationName = station?.Name ?? "Unknown Station",
                 WmoId = wmoId,
                 AverageTemperature = averageTemp,
-                ObservationCount = observations.Count
+                ObservationCount = recCount
             };
         }
 
-        public async Task<double> CalculateAverageTemperatureAsync(string wmoId, int hours = 72)
+        public async Task<(double AverageTemperature, int RecordCount)> CalculateAverageTemperatureAsync(string wmoId, int hours = 72)
         {
             var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
-            var cutoffTime = DateTime.Now.AddHours(-hours);
+            var cutoffTime = DateTime.UtcNow.AddHours(-hours); //Calculate the cutoff time form current utc time, since we are dealing with UTC time of the response
 
             var recentObservations = observations
                 .Where(o => o.ObservationTime >= cutoffTime && o.Temperature.HasValue)
                 .ToList();
 
             if (!recentObservations.Any())
-                return 0;
+                return (0, 0);
 
-            return recentObservations.Average(o => o.Temperature!.Value);
+            var averageTemp = recentObservations.Average(o => o.Temperature!.Value);
+            return (averageTemp, recentObservations.Count);
 
         }
 

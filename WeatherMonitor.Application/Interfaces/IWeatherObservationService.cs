@@ -12,7 +12,7 @@ namespace WeatherMonitor.Application.Interfaces
     {
         Task<WeatherObservationSummaryDto> GetWeatherSummaryAsync(string wmoId);
         Task<List<WeatherObservationDto>> GetAllWeatherDataAsync(string wmoId);
-        Task<double> CalculateAverageTemperatureAsync(string wmoId, int hours = 72);
+        Task<(double AverageTemperature, int RecordCount)> CalculateAverageTemperatureAsync(string wmoId, int hours = 72);
         Task<WeatherObservationStation?> FindStationAsync(string searchTerm);
         Task<List<WeatherObservationStation>> GetAvailableStationsAsync();
     }

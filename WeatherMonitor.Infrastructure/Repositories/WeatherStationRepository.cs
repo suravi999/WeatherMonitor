@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using WeatherMonitor.Core.Entities;
 using WeatherMonitor.Core.Interfaces;
 
@@ -10,34 +11,57 @@ namespace WeatherMonitor.Infrastructure.Repositories
 {
     public class WeatherStationRepository : IWeatherStationRepository
     {
+        private readonly List<WeatherObservationStation> _stations;
         public WeatherStationRepository()
         {
-         
+            _stations = LoadObservationStations();
         }
 
-        public Task<List<WeatherObservationStation>> GetAllStationAsync()
+        public async Task<WeatherObservationStation?> GetStationByNameAsync(string name)
         {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
+            return _stations.FirstOrDefault(s =>
+                s.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public Task<WeatherObservationStation?> GetStationByNameAsync(string country)
+        public async Task<WeatherObservationStation?> GetStationByWmoIdAsync(string wmoId)
         {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
+            return _stations.FirstOrDefault(s => s.WmoId == wmoId);
         }
 
-        public Task<WeatherObservationStation?> GetStationByWmoIdAsync(string wmoId)
+
+        public async Task<bool> IsValidWmoAsync(string wmoId)
         {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
+            return _stations.Any(s => s.WmoId == wmoId);
         }
 
-        public Task<List<WeatherObservationStation>> GetStationsByStateAsync(string state)
+        private List<WeatherObservationStation> LoadObservationStations()
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> IsValidWmoAsync(string wmoId)
-        {
-            throw new NotImplementedException();
+            return new List<WeatherObservationStation>
+            {
+                new()
+                {
+                    Name = "Adelaide Airport",
+                    WmoId = "94672"
+                },
+                new()
+                {
+                    Name = "Edinburgh",
+                    WmoId = "95676"
+                },
+                new()
+                {
+                    Name = "Hindmarsh Island",
+                    WmoId = "94677"
+                },
+                new()
+                {
+                    Name = "Kuitpo",
+                    WmoId = "94683"
+                }
+            };
         }
     }
 }
