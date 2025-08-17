@@ -20,24 +20,67 @@ namespace WeatherMonitor.Application.Services
             _weatherStationRepository = weatherStationRepository;
         }
 
+        public async Task<List<WeatherObservationDto>> GetAllWeatherDataAsync(string wmoId)
+        {
+            var station = await _weatherStationRepository.GetStationByWmoIdAsync(wmoId);
+            if (station == null)
+            {
+                throw new ArgumentException($"Weather station with WMO ID '{wmoId}' not found", nameof(wmoId));
+            }
+
+            var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
+
+            return observations.Select(o => new WeatherObservationDto
+            {
+                StationName = o.StationName,
+                WmoId = o.WmoId,
+                ObservationTime = o.ObservationTime,
+                Temperature = o.Temperature,
+                ApparentTemperature = o.ApparentTemperature,
+                DewPoint = o.DewPoint,
+                Humidity = o.Humidity,
+                WindDirection = o.WindDirection,
+                WindSpeed = o.WindSpeed,
+                Pressure = o.Pressure,
+                WeatherCondition = o.WeatherCondition
+            }).ToList();
+        }
+
         public Task<WeatherObservationStation?> FindStationAsync(string searchTerm)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<WeatherObservationDto>> GetAllWeatherDataAsync(string wmoId)
+        public async Task<WeatherObservationSummaryDto> GetWeatherSummaryAsync(string wmoId)
         {
-            throw new NotImplementedException();
+            var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
+            var station = await _weatherStationRepository.GetStationByWmoIdAsync(wmoId);
+
+            var averageTemp = await CalculateAverageTemperatureAsync(wmoId);
+
+            return new WeatherObservationSummaryDto
+            {
+                StationName = station?.Name ?? "Unknown Station",
+                WmoId = wmoId,
+                AverageTemperature = averageTemp,
+                ObservationCount = observations.Count
+            };
         }
 
-        public Task<WeatherObservationSummaryDto> GetWeatherSummaryAsync(string wmoId)
+        public async Task<double> CalculateAverageTemperatureAsync(string wmoId, int hours = 72)
         {
-            throw new NotImplementedException();
-        }
+            var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
+            var cutoffTime = DateTime.Now.AddHours(-hours);
 
-        public Task<double> CalculateAverageTemperatureAsync(string wmoId, int hours = 72)
-        {
-            throw new NotImplementedException();
+            var recentObservations = observations
+                .Where(o => o.ObservationTime >= cutoffTime && o.Temperature.HasValue)
+                .ToList();
+
+            if (!recentObservations.Any())
+                return 0;
+
+            return recentObservations.Average(o => o.Temperature!.Value);
+
         }
 
         public Task<List<WeatherObservationStation>> GetAvailableStationsAsync()
