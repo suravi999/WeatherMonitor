@@ -59,5 +59,19 @@ namespace WeatherMonitor.WebApi.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpGet("{wmoId}/average-temperature")]
+        public async Task<ActionResult> GetAverageTemperature(string wmoId, [FromQuery] int hours = 72)
+        {
+            try
+            {
+                var average = await _weatherObservationService.CalculateAverageTemperatureAsync(wmoId, hours);
+                return Ok(new { wmoId, hours, averageTemperature = average });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }

@@ -40,5 +40,9 @@ namespace WeatherMonitor.Application.Services
             throw new NotImplementedException();
         }
 
+        public Task<List<WeatherObservationStation>> GetAvailableStationsAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
