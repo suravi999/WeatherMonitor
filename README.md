@@ -32,7 +32,7 @@ This Weather Monitor system demonstrates Clean Architecture principles with a cl
 
 ### Clone and Build
 ```bash
-git clone <repository-url>
+git clone https://github.com/suravi999/WeatherMonitor.git
 cd WeatherMonitor
 dotnet restore
 dotnet build
