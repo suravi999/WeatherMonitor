@@ -101,6 +101,50 @@ dotnet test --verbosity normal
 2. Build solution (Ctrl+Shift+B)
 3. Click **"Run All Tests"** or press Ctrl+R, A
 
+## 🚀 Deployment
+
+### IIS Deployment
+
+#### 1. Publish the Web API
+```bash
+# Publish for production
+dotnet publish WeatherMonitor.WebApi -c Release -o ./publish
+
+# Self-contained deployment
+dotnet publish WeatherMonitor.WebApi -c Release -r win-x64 --self-contained -o ./publish
+```
+
+#### 2. IIS Configuration
+1. **Install .NET 9.0 Hosting Bundle** on IIS server
+2. **Create new IIS Site**:
+   - Site name: WeatherMonitor
+   - Physical path: Point to the publish folder
+   - Port: 80 or 443 (HTTPS)
+3. **Application Pool Settings**:
+   - .NET CLR Version: No Managed Code
+   - Managed Pipeline Mode: Integrated
+4. **Copy published files** to IIS directory
+5. **Restart IIS** and test endpoints
+
+#### 3. Verify Deployment
+```bash
+# Test API endpoints
+curl http://host-server/api/WeatherObservation/95676
+curl http://host-server/swagger  # Swagger UI
+```
+
+### Console App Deployment
+```bash
+# Publish console app
+dotnet publish WeatherMonitor.UI.ConsoleApp -c Release -r win-x64 --self-contained -o ./console-publish
+
+# Copy executable to target server
+# Run: WeatherMonitor.UI.ConsoleApp.exe [station] [options]
+
+# Get Help
+# Run: WeatherMonitor.UI.ConsoleApp.exe --help
+```
+
 ## Available Weather Stations
 
 | Station Name | WMO ID | Location |
