@@ -46,6 +46,63 @@ namespace WeatherMonitor.Application.Services
             }).ToList();
         }
 
+        public async Task<List<Dictionary<string, object?>>> GetSpecificWeatherDataAsync(string wmoId, WeatherObservationSpecificDataRequest request)
+        {
+            var station = await _weatherStationRepository.GetStationByWmoIdAsync(wmoId);
+            if (station == null)
+            {
+                throw new ArgumentException($"Weather station with WMO ID '{wmoId}' not found", nameof(wmoId));
+            }
+
+            // Get observations
+            var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
+
+            // Create simple array of data objects
+            var result = new List<Dictionary<string, object?>>();
+
+            foreach (var observation in observations)
+            {
+                var dataObject = new Dictionary<string, object?>();
+
+                // If no specific fields requested, include all data
+                if (request.RequestedDataTypes == null || !request.RequestedDataTypes.Any())
+                {
+                    dataObject = new Dictionary<string, object?>
+                    {
+                        ["temperature"] = observation.Temperature,
+                        ["apparentTemperature"] = observation.ApparentTemperature,
+                        ["dewPoint"] = observation.DewPoint,
+                        ["humidity"] = observation.Humidity,
+                        ["windDirection"] = observation.WindDirection,
+                        ["windSpeed"] = observation.WindSpeed,
+                        ["pressure"] = observation.Pressure,
+                        ["weatherCondition"] = observation.WeatherCondition,
+                        ["observationTime"] = observation.ObservationTime
+                    };
+                }
+                else
+                {
+                    // Include only requested fields
+                    foreach (var fieldName in request.RequestedDataTypes)
+                    {
+                        var value = GetFieldValue(observation, fieldName.ToLower());
+                        if (value != null)
+                        {
+                            dataObject[fieldName] = value;
+                        }
+                    }
+                }
+
+                // Only add if we have data
+                if (dataObject.Any())
+                {
+                    result.Add(dataObject);
+                }
+            }
+
+            return result;
+        }
+
         public async Task<WeatherObservationStation?> FindStationAsync(string searchTerm)
         {
             //Try search using WMO ID first
@@ -98,7 +155,7 @@ namespace WeatherMonitor.Application.Services
             return await _weatherStationRepository.GetAllStationsAsync();
         }
 
-        public async Task<WeatherObservationDataResponse> GetWeatherDataAsync(string wmoId, WeatherObservationDataRequest request)
+        public async Task<WeatherObservationSummaryDataResponse> GetWeatherDataAsync(string wmoId, WeatherObservationSummaryDataRequest request)
         {
             var observations = await _weatherObservationDataRepository.GetWeatherObservationsAsync(wmoId);
             var latest = observations.FirstOrDefault();//assuming the first one is the latest
@@ -106,7 +163,7 @@ namespace WeatherMonitor.Application.Services
 
             var (averageTemp, recCount) = await CalculateAverageTemperatureAsync(wmoId, request.TimeRangeHours);
 
-            var response = new WeatherObservationDataResponse
+            var response = new WeatherObservationSummaryDataResponse
             {
                 StationName = station?.Name ?? "Unknown Station",
                 WmoId = wmoId,
@@ -162,5 +219,7 @@ namespace WeatherMonitor.Application.Services
                 _ => null
             };
         }
+
+        
     }
 }

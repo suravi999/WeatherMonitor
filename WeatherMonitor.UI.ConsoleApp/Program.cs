@@ -8,7 +8,7 @@ namespace WeatherMonitor.ConsoleApp
     class Program
     {
         private const string DefaultWmoId = "94672"; // Adelaide Airport by default
-        private const string API_BASE_WEATHER = "https://localhost:44303"; // Update this to your actual API base URL, if profile https use "https://localhost:7131"
+        private const string API_BASE_WEATHER = "https://localhost:44303"; // backend WebAPI base URL, if profile https use "https://localhost:7131"
 
         private static readonly HttpClient _httpClient = new();
         private static string _apiWeatherUrl = API_BASE_WEATHER + "/api/WeatherObservation";
@@ -19,7 +19,7 @@ namespace WeatherMonitor.ConsoleApp
 
             if(args.Length == 1 && (args[0].ToLower() == "--help" || args[0].ToLower() == "-h"))
             {
-                await Help();
+                await Help();//print help details
                 Console.WriteLine("\nPress any key to exit...");
                 Console.ReadKey();
                 return;
@@ -92,7 +92,7 @@ namespace WeatherMonitor.ConsoleApp
 
                 if (response != null)
                 {
-                    DisplayWeatherResponse(response);
+                    DisplayWeatherResponse(response, requestData.TimeRangeHours);
                 }
                 else
                 {
@@ -110,9 +110,9 @@ namespace WeatherMonitor.ConsoleApp
             }
         }
 
-        private static WeatherObservationDataRequest BuildWeatherDataRequest(string[] args)
+        private static WeatherObservationSummaryDataRequest BuildWeatherDataRequest(string[] args)
         {
-            var request = new WeatherObservationDataRequest
+            var request = new WeatherObservationSummaryDataRequest
             {
                 TimeRangeHours = 72, //Default 72 hours
                 AdditionalFields = new List<string>()
@@ -166,7 +166,7 @@ namespace WeatherMonitor.ConsoleApp
             return request;
         }
 
-        private static async Task<WeatherObservationDataResponse?> PostWeatherDataRequest(string wmoId, WeatherObservationDataRequest requestData)
+        private static async Task<WeatherObservationSummaryDataResponse?> PostWeatherDataRequest(string wmoId, WeatherObservationSummaryDataRequest requestData)
         {
             try
             {
@@ -187,7 +187,7 @@ namespace WeatherMonitor.ConsoleApp
                 }
 
                 var responseJson = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<WeatherObservationDataResponse>(responseJson, new JsonSerializerOptions
+                return JsonSerializer.Deserialize<WeatherObservationSummaryDataResponse>(responseJson, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
@@ -199,14 +199,14 @@ namespace WeatherMonitor.ConsoleApp
             }
         }
 
-        private static void DisplayWeatherResponse(WeatherObservationDataResponse response)
+        private static void DisplayWeatherResponse(WeatherObservationSummaryDataResponse response, int timeRangeHours)
         {
             Console.WriteLine("=== Weather Data Response ===");
 
             //Display required default fields
             Console.WriteLine($"Station Name: {response.StationName}");
             Console.WriteLine($"WMO ID: {response.WmoId}");
-            Console.WriteLine($"Average Temperature (72h): {response.AverageTemperature:F1}°C");
+            Console.WriteLine($"Average Temperature ({timeRangeHours}h): {response.AverageTemperature:F1}°C");
             Console.WriteLine($"Total Observations: {response.ObservationCount}");
 
             //Display additional requested data

@@ -33,14 +33,36 @@ namespace WeatherMonitor.WebApi.Controllers
             }
         }
 
+        // POST method to get specific weather data pieces
+        [HttpPost("{wmoId}")]
+        public async Task<ActionResult<List<Dictionary<string, object?>>>> GetSpecificWeatherData( string wmoId, [FromBody] WeatherObservationSpecificDataRequest? request = null)
+        {
+            try
+            {
+                // If no body provided, use default request
+                request ??= new WeatherObservationSpecificDataRequest();
+
+                var data = await _weatherObservationService.GetSpecificWeatherDataAsync(wmoId, request);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         // POST method to get weather data with optional request body
         [HttpPost("{wmoId}/summary")]
-        public async Task<ActionResult<WeatherObservationDataResponse>> GetWeatherData(string wmoId, [FromBody] WeatherObservationDataRequest? request = null)
+        public async Task<ActionResult<WeatherObservationSummaryDataResponse>> GetWeatherData(string wmoId, [FromBody] WeatherObservationSummaryDataRequest? request = null)
         {
             try
             {
                 //If no body provided, use default request
-                request ??= new WeatherObservationDataRequest();
+                request ??= new WeatherObservationSummaryDataRequest();
 
                 var data = await _weatherObservationService.GetWeatherDataAsync(wmoId, request);
                 return Ok(data);
