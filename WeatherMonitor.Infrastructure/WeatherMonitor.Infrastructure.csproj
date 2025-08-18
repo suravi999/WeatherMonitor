@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WeatherMonitor.Core\WeatherMonitor.Core.csproj" />
+    <ProjectReference Include="..\WeatherMonitor.Application\WeatherMonitor.Application.csproj" />
   </ItemGroup>
 
 </Project>
