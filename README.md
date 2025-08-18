@@ -1,4 +1,4 @@
-# Weather Monitor System
+# 🌦️ Weather Monitor System 🌦️
 
 A professional weather monitoring application built for the Business Information Systems (BIS) team to retrieve and analyze South Australian weather observation data from the Bureau of Meteorology.
 
